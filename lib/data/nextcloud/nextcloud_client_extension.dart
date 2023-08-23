@@ -35,13 +35,15 @@ extension NextcloudClientExtension on NextcloudClient {
 
   Future<Map<String, String>> getConfig() async {
     final Uint8List file;
+    await webdav.mkcol(appRootDirectoryPrefix);
     try {
       file = await webdav.get(configFilePath);
     } on DynamiteApiException {
       return {};
     }
-    Map<String, dynamic> bytes = jsonDecode(_utf8Decoder.convert(file));
-    return bytes.cast<String, String>();
+    List bytes = jsonDecode(_utf8Decoder.convert(file));
+    String json = _utf8Decoder.convert(bytes.cast<int>());
+    return Map<String, String>.from(jsonDecode(json));
   }
   Future<void> setConfig(Map<String, String> config) async {
     String json = jsonEncode(config);
