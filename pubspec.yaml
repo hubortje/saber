@@ -59,6 +59,7 @@ dependencies:
     git:
       url: https://github.com/nextcloud/neon
       path: packages/nextcloud
+      ref: 594ecb2c0bdb17a3585e91e198ce515fb0824f2e
 
   collapsible: ^1.0.0
 
@@ -96,7 +97,7 @@ dependencies:
 
   animations: ^2.0.7
 
-  flutter_quill: ^7.0.0
+  flutter_quill: <7.4.0
 
   window_manager: ^0.3.0
 
@@ -186,6 +187,12 @@ dependency_overrides:
     git:
       url: https://github.com/adil192/bson
       ref: toJson
+
+  dynamite_runtime:
+    git:
+      url: https://github.com/nextcloud/neon
+      path: packages/dynamite/dynamite_runtime
+      ref: 594ecb2c0bdb17a3585e91e198ce515fb0824f2e
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
