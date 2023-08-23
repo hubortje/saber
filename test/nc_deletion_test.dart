@@ -53,8 +53,8 @@ void main() {
 
     // Check that the file exists on Nextcloud
     printOnFailure('Checking if $filePathRemote exists on Nextcloud');
-    final webDavFiles = await webdav.propfind(filePathRemote, depth: WebDavDepth.zero)
-        .then((multistatus) => multistatus.toWebDavFiles());
+    final webDavFiles = await webdav.ls(filePathRemote, depth: '0')
+        .then((multistatus) => multistatus.toWebDavFiles(webdav));
     expect(webDavFiles.length, 1, reason: 'File should exist on Nextcloud');
 
     // Delete the file
@@ -65,9 +65,9 @@ void main() {
     await FileSyncer.uploadFileFromQueue();
 
     // Check that the file is empty on Nextcloud
-    final webDavFile = await webdav.propfind(filePathRemote, depth: WebDavDepth.zero, prop: WebDavPropWithoutValues.fromBools(
+    final webDavFile = await webdav.ls(filePathRemote, depth: '0', prop: WebDavPropfindProp.fromBools(
       davgetcontentlength: true,
-    )).then((multistatus) => multistatus.toWebDavFiles().single);
+    )).then((multistatus) => multistatus.toWebDavFiles(webdav).single);
     expect(webDavFile.size, 0, reason: 'File should be empty on Nextcloud');
 
     // Sync the file from Nextcloud

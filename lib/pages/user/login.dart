@@ -32,11 +32,11 @@ class _NcLoginPageState extends State<NcLoginPage> {
       password: loginDetails.ncPassword,
     );
 
-    final CoreOcsGetCapabilitiesResponse200ApplicationJson_Ocs_Data capabilities;
+    final CoreServerCapabilities_Ocs_Data capabilities;
     final bool ncServerIsSupported;
     final int ncSupportedVersion;
     try {
-      capabilities = await client.core.ocs.getCapabilities()
+      capabilities = await client.core.getCapabilities()
         .then((capabilities) => capabilities.ocs.data);
       (ncServerIsSupported, ncSupportedVersion) = client.core.isSupported(capabilities);
       log.info('ncServerIsSupported: $ncServerIsSupported, ncSupportedVersion: $ncSupportedVersion');
@@ -64,6 +64,7 @@ class _NcLoginPageState extends State<NcLoginPage> {
     client = NextcloudClient(
       loginDetails.url,
       loginName: username,
+      username: username,
       password: loginDetails.ncPassword,
     );
 
@@ -88,11 +89,10 @@ class _NcLoginPageState extends State<NcLoginPage> {
     Prefs.ncPassword.value = loginDetails.ncPassword;
 
     Prefs.pfp.value = null;
-    client.core.avatar.getAvatar(userId: username, size: 512)
-        .then((response) => response.data)
+    client.core.getAvatar(userId: username, size: 512)
         .then((Uint8List pfp) {
-          Prefs.pfp.value = pfp;
-        });
+      Prefs.pfp.value = pfp;
+    });
 
     Prefs.lastStorageQuota.value = null;
 

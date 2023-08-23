@@ -51,20 +51,20 @@ abstract class FileSyncer {
 
     uploadFileFromQueue();
 
-    if (_client?.loginName != Prefs.username.value) _client = null;
+    if (_client?.username != Prefs.username.value) _client = null;
     _client ??= NextcloudClientExtension.withSavedDetails();
     if (_client == null) return;
 
     // Get list of remote files from server
     List<WebDavFile> remoteFiles;
     try {
-      remoteFiles = await _client!.webdav.propfind(
+      remoteFiles = await _client!.webdav.ls(
         FileManager.appRootDirectoryPrefix,
-        prop: WebDavPropWithoutValues.fromBools(
+        prop: WebDavPropfindProp.fromBools(
           davgetcontentlength: true,
           davgetlastmodified: true,
         ),
-      ).then((multistatus) => multistatus.toWebDavFiles());
+      ).then((multistatus) => multistatus.toWebDavFiles(_client!.webdav));
     } on SocketException { // network error
       filesDone.value = filesDoneLimit;
       downloadCancellable.cancelled = true;
@@ -121,7 +121,7 @@ abstract class FileSyncer {
     await _uploadQueue.waitUntilLoaded();
     if (_uploadQueue.value.isEmpty) return;
 
-    if (_client?.loginName != Prefs.username.value) _client = null;
+    if (_client?.username != Prefs.username.value) _client = null;
     _client ??= NextcloudClientExtension.withSavedDetails();
     if (_client == null) return;
 
@@ -186,7 +186,7 @@ abstract class FileSyncer {
       }
 
       // upload file
-      await webdav.put(
+      await webdav.upload(
         localDataEncrypted,
         filePathRemote,
         lastModified: lastModified,
@@ -293,7 +293,7 @@ abstract class FileSyncer {
 
     final Uint8List encryptedDataEncoded;
     try {
-      encryptedDataEncoded = await _client!.webdav.get(file.remotePath);
+      encryptedDataEncoded = await _client!.webdav.download(file.remotePath);
     } on DynamiteApiException {
       return false;
     }
@@ -345,14 +345,14 @@ abstract class FileSyncer {
 
     // get remote file
     try {
-      file.webDavFile ??= await _client!.webdav.propfind(
+      file.webDavFile ??= await _client!.webdav.ls(
         file.remotePath,
-        depth: WebDavDepth.zero,
-        prop: WebDavPropWithoutValues.fromBools(
+        depth: '0',
+        prop: WebDavPropfindProp.fromBools(
           davgetlastmodified: true,
           davgetcontentlength: true,
         ),
-      ).then((multistatus) => multistatus.toWebDavFiles().single);
+      ).then((multistatus) => multistatus.toWebDavFiles(_client!.webdav).single);
     } catch (e) {
       // remote file doesn't exist; keep local
       return true;
