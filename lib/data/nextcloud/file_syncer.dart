@@ -291,9 +291,9 @@ abstract class FileSyncer {
       return true;
     }
 
-    final Uint8List encryptedDataBytes;
+    final Uint8List encryptedDataEncoded;
     try {
-      encryptedDataBytes = await _client!.webdav.get(file.remotePath);
+      encryptedDataEncoded = await _client!.webdav.get(file.remotePath);
     } on DynamiteApiException {
       return false;
     }
@@ -302,6 +302,10 @@ abstract class FileSyncer {
     final IV iv = IV.fromBase64(Prefs.iv.value);
 
     try {
+      final String encryptedDataBytesJson = utf8.decode(encryptedDataEncoded); // formatted weirdly e.g. [57, 2, 3, ...][128, 0, 13, ...][...]
+      final Uint8List encryptedDataBytes = Uint8List.fromList(
+        jsonDecode(encryptedDataBytesJson.replaceAll('][', ',')).cast<int>(),
+      );
       final Uint8List decryptedData;
       if (file.localPath.endsWith(Editor.extensionOldJson)) {
         decryptedData = await workerManager.execute(
