@@ -61,6 +61,11 @@ jobs:
           rm -rf submodules
           rm -rf test
           rm -rf windows
+      
+      - name: Check umask
+        run: |
+          umask
+          umask -S
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
